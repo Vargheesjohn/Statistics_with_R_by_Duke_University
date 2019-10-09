@@ -1,0 +1,150 @@
+```{r load-packages, message = FALSE}
+library(dplyr)
+library(ggplot2)
+library(statsr)
+```
+
+```{r load-abrbuthnot-data}
+data(arbuthnot)
+```
+
+```{r load-abrbuthnot-data}
+data(arbuthnot)
+```
+
+```{r view-data}
+arbuthnot
+```
+
+```{r dim-data}
+dim(arbuthnot)
+```
+
+```{r names-data}
+names(arbuthnot)
+```
+
+```{r view-boys}
+arbuthnot$boys
+```
+
+```{r extract-counts-of-girls-born}
+# type your code for the Question 2 here, and Knit
+arbuthnot$girls
+```
+
+
+```{r plot-girls-vs-year}
+ggplot(data = arbuthnot, aes(x = year, y = girls)) +
+  geom_point()
+```
+
+```{r plot-help, tidy = FALSE}
+?ggplot
+```
+
+```{r calc-total-bapt-numbers}
+5218 + 4683
+```
+
+```{r calc-total-bapt-vars}
+arbuthnot$boys + arbuthnot$girls
+```
+
+```{r calc-total-bapt-vars-save}
+arbuthnot <- arbuthnot %>%
+  mutate(total = boys + girls)
+```
+
+```{r plot-total-vs-year-line}
+ggplot(data = arbuthnot, aes(x = year, y = total)) +
+  geom_line()
+```
+
+```{r plot-total-vs-year-line-and-point}
+ggplot(data = arbuthnot, aes(x = year, y = total)) +
+  geom_line() +
+  geom_point()
+```
+
+```{r plot-proportion-of-boys-over-time}
+# type your code for the Exercise here, and Knit
+ggplot(data = arbuthnot, aes(x = year, y = boys / total)) + geom_line() + geom_point()
+```
+
+```{r boys-more-than-girls}
+arbuthnot <- arbuthnot %>%
+  mutate(more_boys = boys > girls)
+```
+
+```{r load-present-data}
+data(present)
+```
+
+```{r variables-in-present}
+# type your code for Question 4 here, and Knit
+
+```
+
+```{r years-in-present-data}
+# type your code for Exercise here, and Knit
+
+```
+
+```{r prop-boys-over-time}
+# type your code for Question 5 here, and Knit
+present <- present %>%
+  mutate(total = boys + girls)
+present <- present %>%
+  mutate(prop_boys = boys / total)
+ggplot(data = present, aes(x = year, y = prop_boys)) +
+  geom_line()
+```
+
+```{r more-boys-per-year}
+# type your code for Question 6 here, and Knit
+present <- present %>%
+  mutate(more_boys = boys > girls)
+```
+
+```{r prop-boy-girl-over-time}
+# type your code for Question 7 here, and Knit
+present <- present %>%
+  mutate(prop_boy_girl = boys / girls)
+ggplot(data = present, aes(x = year, y = prop_boy_girl)) +
+  geom_line()
+```
+
+________________________________________________________
+
+1.Question 1
+How many variables are included in this data set (data set: arbuthnot)?
+3
+
+2.Question 2
+What command would you use to extract just the counts of girls born?
+arbuthnot$girls
+
+3.Question 3
+Which of the following best describes the number of girls baptised over the years included in this dataset?
+There is initially an increase in the number of girls baptised, which peaks around 1640. After 1640 there is a decrease in the number of girls baptised, but the number begins to increase again in 1660. Overall the trend is an increase in the number of girls baptised.
+
+4.Question 4
+How many variables are included in this data set (data set: present)?
+4
+
+5.Question 5
+Calculate the total number of births for each year and store these values in a new variable called total in the present dataset. Then, calculate the proportion of boys born each year and store these values in a new variable called prop_boys in the same dataset. Plot these values over time and based on the plot determine if the following statement is true or false: The proportion of boys born in the US has decreased over time.
+TRUE
+
+6.Question 6
+Create a new variable called more_boys which contains the value of either TRUE if that year had more boys than girls, or FALSE if that year did not. Based on this variable which of the following statements is true?
+Every year there are more boys born than girls.
+
+7.Question 7
+Calculate the boy-to-girl ratio each year, and store these values in a new variable called prop_boy_girl in the present dataset. Plot these values over time. Which of the following best describes the trend?
+There is initially a decrease in the boy-to-girl ratio, and then an increase between 1960 and 1970, followed by a decrease.
+
+8.Question 8
+In what year did we see the most total number of births in the U.S.?
+2007
