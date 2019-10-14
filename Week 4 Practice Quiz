@@ -43,6 +43,7 @@ ________________________________________________________________________________
 Suppose IQ scores are normally distributed with mean 100 and standard deviation 10. Which of the following is false?
     --A normal probability plot of IQ scores of a random sample of 1,000 people should show a straight line.
     --A score greater than 130 is more unusual than a score less than 80.
+    --Roughly 68% of people have IQ scores between 90 and 110.
 
 2.Question 2
 A 2005 survey found that 7% of teenagers (ages 13 to 17) suffer from an extreme fear of spiders (arachnophobia). At a summer camp there 
@@ -55,7 +56,6 @@ Your roommate loves to eat Chinese food for dinner. He estimates that on any giv
 Chinese food. Although he loves Chinese food, he doesn’t like to eat it too much in a short period of time, so on most weeks he eats 
 several different kinds of foods for dinner. Suppose you wanted to calculate the probability that, over the next 7 days, you friend 
 eats Chinese food at least 3 times. Which of the following is the most accurate statement about calculating this probability?
-    --Because we know n = 7, k = 3, and p = 0.30, we can use the binomial distribution to calculate the desired probability.
     Because he doesn’t like to eat Chinese food too much in a short period of time, p is not really the same for each trial and so we cannot use the binomial distribution to calculate the desired probability.
 
 4.Question 4
