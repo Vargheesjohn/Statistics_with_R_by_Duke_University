@@ -37,3 +37,51 @@ Given this information, what is the probability that they are identical?
 7.Question 7
 Which of the following probabilities can be calculated using the normal approximation to the binomial distribution?
     A clothing store offers store credit cards and only about 17% of the credit card holders are males. If we were to randomly sample 100 store credit card holders to conduct a survey, what is the probability that at most 20 of the sampled individuals would be males?
+_____________________________________________________________________________________________________________________________________
+
+1.Question 1
+Suppose IQ scores are normally distributed with mean 100 and standard deviation 10. Which of the following is false?
+    --A normal probability plot of IQ scores of a random sample of 1,000 people should show a straight line.
+    --A score greater than 130 is more unusual than a score less than 80.
+
+2.Question 2
+A 2005 survey found that 7% of teenagers (ages 13 to 17) suffer from an extreme fear of spiders (arachnophobia). At a summer camp there 
+are 10 teenagers sleeping in each tent. Assume that these 10 teenagers are independent of each other. What is the probability that at 
+least one of them suffers from arachnophobia?
+    52%
+
+3.Question 3
+Your roommate loves to eat Chinese food for dinner. He estimates that on any given night, there’s a 30% chance he’ll choose to eat 
+Chinese food. Although he loves Chinese food, he doesn’t like to eat it too much in a short period of time, so on most weeks he eats 
+several different kinds of foods for dinner. Suppose you wanted to calculate the probability that, over the next 7 days, you friend 
+eats Chinese food at least 3 times. Which of the following is the most accurate statement about calculating this probability?
+    --Because we know n = 7, k = 3, and p = 0.30, we can use the binomial distribution to calculate the desired probability.
+    Because he doesn’t like to eat Chinese food too much in a short period of time, p is not really the same for each trial and so we cannot use the binomial distribution to calculate the desired probability.
+
+4.Question 4
+Suppose you observe a data point x = 12 and it is known that this data point came from a normal distribution with mean 5 and standard 
+deviation 2. Which of the following statements is true regarding the observation of x = 12?
+    The observation would be considered unusual because it is farther than three standard deviations from the mean.
+
+5.Question 5
+Which of the following is true? Hint: It might be useful to sketch the distributions.
+    The Z score for the median is approximately 0 if the distribution is bimodal and symmetric.
+
+6.Question 6
+More than three-quarters of the nation’s colleges and universities now offer online classes, and about 23% of college graduates have 
+taken a course online. 39% of those who have taken a course online believe that online courses provide the same educational value as 
+one taken in person, a view shared by only 27% of those who have not taken an online course. At a coffee shop you overhear a recent 
+college graduate discussing that she doesn’t believe that online courses provide the same educational value as one taken in person. 
+What’s the probability that she has taken an online course before?
+    0.1997
+
+7.Question 7
+Your boss is a biologist who needs wood samples from long-leaf pine trees with a fungal disease which is only visible under a 
+microscope, and she sends you on an assignment to collect the samples. She wants at least 50 different diseased samples. 
+She tells you that approximately 28% of long-leaf pine trees currently have the fungal disease. If you sample 160 long-leaf pine 
+trees at random, what is the probability you’ll have at least 50 diseased samples to return to your boss? (Use the normal approximation 
+to calculate this probability and chose the closest answer to the question.)
+    18%
+
+8. About 24% of flights departing from New York’s John F. Kennedy International Airport were delayed in 2009. Assuming that the chance of a flight being delayed has stayed constant at 24%, we are interested in finding the probability of 10 out of the next 100 departing flights being delayed. Noting that if one flight is delayed, the next flight is more likely to be delayed, which of the following statements is correct?
+    We cannot calculate this probability using the binomial distribution since whether or not one flight is delayed is not independent of another.
