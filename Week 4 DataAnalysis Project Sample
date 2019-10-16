@@ -1,0 +1,318 @@
+
+#title: "Example Exploratory Data Analysis"
+
+#This is an unmarked optional tutorial to show the kind of thinking that goes into an exploratory 
+#data analysis
+
+#The goal of this tutorial document is to walk through some of the common issues encountered in the 
+#early stages of an exploratory analysis on a set of data. It gives examples of common problem areas 
+#in:
+#reading in data
+#dealing with blanks
+#dealing with factors
+
+#This data is a modified version of data from the New Zealand Election Survey, deliberately modified 
+#to introduce problems that occur naturally in many data sets.
+
+# Some Packages to install (if not installed already)
+install.packages("dplyr")
+install.packages("ggplot2")
+
+#loading the data
+load("selected_nzes2011.Rdata")
+
+#loading the package
+library(dplyr)
+
+#Step One. Learn something about the data set.
+#In this case, the New Zealand Election Survey takes place every three years as a postal survey of a 
+#sample of registered electors. Some sampled electors were part of a sample panel of people surveyed 
+#at the previous election as part of a longitudinal study, others were randomly chosen from the 
+#electoral roll. Those electors that were part of the longitudinal panel group were randomly selected 
+#in previous elections. 
+
+#As well as survey results, the data set includes information from the electoral roll, and weighting 
+#values for adjusting results. The full NZES data set has been reduced to a selected group of 
+#variables, making 3101 observations of 107 variables.
+
+# Step Two. Contemplate some questions.
+#Examining the codebook (or in this case the appendix at the end of the document to check out the 
+#variables).
+
+#For example, we might decide that since New Zealand is a Mixed Member Proportional voting system, 
+#where people get to vote for both an electorate (local) representative and a nationwide political 
+#party, that it would be interesting to look at strategic voting under conditions where there are 
+#many political parties to choose from. We identify some relevant variables of interest in the data, 
+#and investigate the nature of the individual variables before we explore their interactions. 
+#The kind of variables they are is going to shape our question. 
+
+#reading the data
+View(selected_nzes2011)
+
+#Step Three. Prepare for the first question
+#As a first question, we might be interested in exploring the relationship between the party the 
+#person voted for, the party that was their favourite, and if they believed that their vote makes a 
+#difference -- focusing on the question that are people who believe their vote makes a difference 
+#more likely to strategically vote for a party not their favourite. To achieve this, we familiarise 
+#ourselves with the variables `jpartyvote`, `jdiffvoting`, and `_singlefav`. First we check the 
+#codebook (see Appendix), then we explore the data.
+
+#Viewing the entire dataset in the Data Viewer window by clicking on the data frame's name in the 
+#Environment or running the `View()` command in the Console can be ineffective since the Data Viewer 
+#only shows the first 100 columns of the data frame. 
+
+#Using the `str()` command on the entire dataset can also be equally ineffective. However we can 
+#subset the columns of interest and take a closer look at them. We can use the `dplyr` chain to 
+#select the variables of interest and investigate only their structure by adding `str()` at the end 
+#of the chain:
+
+#selected_nzes2011 %>% 
+#  select(jpartyvote, jdiffvoting, _singlefav) %>% 
+#  str()
+# If we try to run the above line, we will get an error message about unexpected input or missing object.
+
+#We next need to diagnose where the problem lies -- in the R code or in the data? 
+#The best way to troubleshoot this issue is to run each line of the `dplyr` chain one by one.
+selected_nzes2011
+
+#The first line runs without any erros, but the second line gives an error
+
+#selected_nzes2011 %>% 
+#  select(jpartyvote, jdiffvoting, _singlefav)
+
+#We know that `select()` is a valid `dplyr` function, so that cannot be the problem. This means the 
+#problem might be the variable names. The issue is that R has rules about what variable names are 
+#legal (e.g. no spaces, starting with a letter) and when data is loaded, R will often fix variable 
+#names to make them legal. This happened to the `_singlefav` at the time of loading the data.
+
+#We could check this by looking through every single variable name in the data with the `names()` command.
+names(selected_nzes2011)
+
+#However, when we have hundreds of column names, a useful tip is to just search out only possible 
+#names. We can search the names for a fragment of the name by using the 
+#`grep("FRAGMENT", variable, value = TRUE)` command, which in this case might be:
+grep("singlefav", names(selected_nzes2011), value = TRUE)
+
+#checkinf with some other names (not part of the study)
+grep("ptyvote", names(selected_nzes2011), value = TRUE)
+
+#The `value = TRUE` argument, as described in the help for the `grep()` function reports the mathing 
+#character string, as opposed to the index number for that string.
+
+#We can now confirm that the variable is called `X_singlefav`, 
+#so that is how we should be referring to it.
+selected_nzes2011 %>% 
+  select(jpartyvote, jdiffvoting, X_singlefav) %>% 
+  str()
+
+#These are all categorical data, however they are recorded as characters (text strings) 
+#as opposed to factors.
+
+#An easy way of tabulating these data to see how many times each level of is to use the `group_by()` 
+#function along with the `summarise()` command:
+selected_nzes2011 %>% 
+  group_by(jpartyvote) %>% 
+  summarise(count = n())
+
+#We can see that 23 people answered `"Don't know"`. Since our question is about people who knew which
+#party they voted for, we might want to exclude these observations from our analysis. We can do so by
+#`filter`ing them out.
+selected_nzes2011 %>% 
+  filter(jpartyvote != "Don't know") %>%
+  group_by(jpartyvote) %>% 
+  summarise(count = n())
+#Because there is a `%>%` at the end of the line, R knows to continue on to the next line, as with 
+#any other 'to be continued' symbol at the end of the line.
+
+#We can also similarly view the levels and number of occurances of these levels in the  `X_singlefav` 
+#variable:
+selected_nzes2011 %>% 
+  group_by(X_singlefav) %>% 
+  summarise(count = n())
+
+#This set also has `NA` entries, but in this case we don't want to get rid of anything but the `NA`s 
+#so we need to target them directly. `NA` entries need special targeting because they do not actually 
+#exist (they are different to the text `"NA"` or a variable saved with the name `NA`). 
+
+#If we only wanted to find the `NA`s we would use the `is.na()` function with the name of the 
+#variable inside the parentheses. 
+
+#However since we want the entries that are **not** `NA`s we can use the __Not__ operator, `!`, 
+#to indicate "we want all the ones that are not NA":`!is.na()`. Hence we can `filter` out all 
+#non NAs in our `dplyr` chain:
+selected_nzes2011 %>% 
+  filter(!is.na(X_singlefav)) %>%
+  group_by(X_singlefav) %>% 
+  summarise(count = n())
+
+#And remember that we can `filter` for multiple characteristics at once:
+selected_nzes2011 %>% 
+  filter(!is.na(X_singlefav), jpartyvote != "Don't know") %>%
+  group_by(X_singlefav) %>% 
+  summarise(count=n())
+
+#If we examine the categories in `jdiffvoting` we can see that this variable has levels such as 
+#both `"Don't know"` and `NA`.
+selected_nzes2011 %>% 
+  group_by(jdiffvoting) %>% 
+  summarise(count = n())
+#We need to decide how we want to handle these levels in our analysis.
+
+#Remember that our main question is about whether people vote for their favorite party or a 
+#diffent one. Hence an straighforwrd approach would be to first determine whether each observation 
+#in the data represents a person who voted for the party same as their favorite party or different. 
+#This requires creating a new variable with the `mutate()` function.
+
+#In creating this variable we want to evaluate if for a given observation the values in the 
+#`jpartyvote` and `X_singlefav` variables are the same, or different:
+selected_nzes2011 <- selected_nzes2011 %>%
+  mutate(sameparty = ifelse(
+    jpartyvote == X_singlefav, "same", "different"
+  ))
+
+#This creates a new variable named `sameparty` that has the value `"same"` if `jpartyvote` is equal 
+#to `X_singlefav`, and `"different"` otherwise.
+
+#We can again check our work by exploring the groupings in a View:
+selected_nzes2011 %>%
+  group_by(jpartyvote, X_singlefav, sameparty) %>%
+  summarise(count = n())
+
+#We can see that observations where `jpartyvote` equaled `X_singlefav`, the value `"same"` was 
+#recorded for the new variable `sameparty`, and the value `"different"` was recorded otherwise. 
+#If either `jpartyvote` or `X_singlefav` had an `NA`, R could not check for equality and hence `NA` 
+#was recorded for the `sameparty` variable as well.
+
+#To view and summarize the "same" entries we can use the following:
+selected_nzes2011 %>% 
+  group_by(jpartyvote, X_singlefav, sameparty) %>%
+  summarise(count = n()) %>% 
+  filter(sameparty == "same")
+
+#And to view and summarize the "different" entries we can use the following:
+selected_nzes2011 %>% 
+  group_by(jpartyvote, X_singlefav, sameparty) %>%
+  summarise(count = n()) %>% 
+  filter(sameparty == "different")
+
+#We can also check how we got any `NA`s we have by using the `is.na()` function:
+selected_nzes2011 %>% 
+  group_by(jpartyvote, X_singlefav, sameparty) %>%
+  summarise(count = n()) %>% 
+  filter(is.na(sameparty))
+
+#The checks show that the observations with `NA`s in the `sameparty`are going to be excluded from 
+#the analysis when we fiter out the `NA`s in the `jpartyvote` and `X_singlefav` variables, so we 
+#don't need to worry about them anymore. 
+
+#Step four. Prepare for the second question
+#As a second question, we might be interested in exploring the relationship between age of voters 
+#and how much they like the NZ First party. We become familiar with the variables `jnzflike` and 
+#`jage` in the codebook, then explore the data.
+str(selected_nzes2011$jnzflike)
+str(selected_nzes2011$jage)
+
+#`jnzflike` is a factor variable, in fact it's ordinal and by default the levels are listed in 
+#alphabetical order. Since this is a categorical variable, we can also summarize the occurances of 
+#each level with `group_by()` and `summarise()` again:
+selected_nzes2011 %>% 
+  group_by(jnzflike) %>% 
+  summarise(count = n())
+
+#While `jnzflike` is on a 0 to 10 scale, this variable also has a level labeled `"Don't know"`, 
+#which is why R stores this variable as not a numeric variable.
+
+#`jage`, on the other hand, is an integer, with values that are whole numbers between 0 and infinity 
+#(or `NA`). For this variable we would want to take a look at numerical summaries such as means, 
+#medians, etc.
+selected_nzes2011 %>% 
+  summarise(agemean = mean(jage), agemedian = median(jage), agesd = sd(jage), 
+            agemin = min(jage), agemax = max(jage))
+#What went wrong? The reason why all of the results were reported as NAs is that there were some NA 
+#entries in the `jage` variable (people not reporting their age). Since it is not possible to take 
+#the average of a series of values that contain `NA`s, obtaining the numerical summaries requires 
+#that we exclude the `NA`s from the calculation.
+
+#Most numerical summary functions allow us to easily exclude `NA`s with the `na.rm` argument. See 
+#the help documentation for the `median` function for more information.
+?median
+
+#An alternative approach is just to `filter` out the `NA`s first, and then ask for the numerical 
+#summaries:
+selected_nzes2011 %>% 
+  filter(!(is.na(jage))) %>%
+  summarise(agemean = mean(jage), agemedian = median(jage), agesd = sd(jage), 
+            agemin = min(jage), agemax = max(jage))
+
+#An age range of 18 to 100 is a reasonable age range for a voting age population, so there are no 
+#obvious errors in the data. If there were, we would need to decide if we should filter them out of 
+#the analysis.
+
+#Having gained some familiarity with the specific variables we are using, we next need to consider 
+#if there is additional work we should do on the data in investigating the question. There are a 
+#number of different approaches we might take. For example, we could consider if those that strongly 
+#like NZ First are older than those that strongly dislike NZ First, or we could consider if old 
+#people like NZ First more than young people.
+
+# Approach 1: Strongly liking and disliking NZ First and age
+#If we wanted to select only two of the possible levels in how much people like NZ First, we can 
+#filter for these specific levels. When interested in filtering for multiple values a variable can 
+#take, the `%in%` operator can come in handy:
+selected_nzes2011 %>% 
+  filter(jnzflike %in% c("0","10")) %>%
+  group_by(jnzflike) %>% 
+  summarise(count = n())
+#Remember that the `jnzflike` is not a numerical variable, hence we use the quotation marks around 
+#the values (even though they happen to be numbers).
+#This is an example of simplifying the analysis by considering only two levels of a categorical 
+#variable, as opposed to all possible levels.
+
+# Approach 2: Age and liking for NZ First
+#We might also like to refine our question slightly, asking do people above retirement age 
+#(65 in New Zealand) like NZ First more than younger people. To do this we can turn the numeric age 
+#variable into a categorical variable based on whether people are 65 years or older or younger than 
+#65. Once again we make use of the `mutate()` and `ifelse()` functions:
+selected_nzes2011 <- selected_nzes2011 %>% 
+  mutate(retiredage = ifelse(jage >= 65, "retired age", "working age"))
+selected_nzes2011 %>% 
+  group_by(retiredage) %>% 
+  summarise(count = n())
+#We can see that individuals in the dataset are now labeled as either `"retired age"` or `"working 
+#age"` or neither (`NA`), which we can easily filter out if need be.
+#This is an example of using a numerical threshold to convert a numerical variable to a categorical 
+#variable.
+#For approach 2, we might also be want to turn the scale of liking into numeric values, because at 
+#the moment we cannot easily get summary information of the data in factor form. For example, if we 
+#ty to run the following command, we get an error saying "need numeric data".
+selected_nzes2011 %>% 
+  group_by(retiredage) %>% 
+  summarise(medlike = median(jnzflike))
+#it generates a "need numeric data" error.
+#We can change the type of data with functions of the form `as.thingtochangeto()`, but it is easy to 
+#go wrong with factors. For example, this is wrong:
+selected_nzes2011 <- selected_nzes2011 %>% 
+  mutate(numlikenzf = as.numeric(jnzflike))
+#We can see it has gone wrong if we use grouping to check our work (and it is a very good plan to 
+#check our work after converting factors).
+selected_nzes2011 %>% 
+  group_by(jnzflike, numlikenzf) %>% 
+  summarise(count = n())
+#Factor entries have two parts: the text we see on the screen, and a numeric order (remember how 10 
+#was coming between 1 and 2 because of the alphabetical order). When we say "turn this into a 
+#number",R uses the numeric order in which it stores the values to do that conversion, as opposed to 
+#the names of the levels of the categorical variable. Hence, we need a conversion method that will 
+#use the text strings that label the levels, as opposed to the storage order of these levels. We can 
+#do this by first saving the variable as a character variable, and then turning it into a number:
+selected_nzes2011 <- selected_nzes2011 %>% 
+  mutate(numlikenzf = as.numeric(as.character(jnzflike)))
+#The warning "NAs introduced by coercion" happens since the level `"Don't know"` cannot be turned 
+#into a number. But this should be fine for our purposes since we are interested in the numerical 
+#responses anyway.
+selected_nzes2011 %>% 
+  group_by(jnzflike, numlikenzf) %>% 
+  summarise(count = n())
+#Converting the factor to a character first ensures that the numerical values used in the labels of 
+#the levels of the categorical variable are used.
+
+#Now that we cleaned up the data in a way that addresses the needs of the research questions we want 
+#to explore, we are ready to continue with our analysis.
