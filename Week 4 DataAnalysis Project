@@ -1,0 +1,128 @@
+---
+  title: "Exploring the BRFSS data"
+output: 
+  html_document: 
+  fig_height: 4
+highlight: pygments
+theme: spacelab
+---
+
+### Load packages
+
+library(ggplot2)
+library(dplyr)
+
+### Load data
+load("brfss2013.RData")
+
+### Part 1: 
+##About the Data
+# The Behavioral Risk Factor Surveillance System (BRFSS) is a collaborative project between all of the states in the United States (US) and participating US territories and the Centers for Disease Control and Prevention (CDC). The BRFSS is designed to collect uniform, state-specific data on preventive health practices and risk behaviors that are linked to chronic diseases, injuries, and preventable infectious diseases that affect the adult population. tobacco use, HIV/AIDS knowledge and prevention, exercise, immunization, health status, healthy days — health-related quality of life, health care access, inadequate sleep, hypertension awareness, cholesterol awareness, chronic health conditions, alcohol consumption, fruits and vegetables consumption, arthritis burden, and seatbelt use are some of the factors assessed by the BRFSS in 2013.
+## Data Collection:
+# The BRFSS was initiated in 1984, with 15 states collecting surveillance data on risk behaviors through monthly telephone interviews. Over time, the number of states participating in the survey increased; by 2001, 50 states, the District of Columbia, Puerto Rico, Guam, and the US Virgin Islands were participating in the BRFSS. Today, all 50 states, the District of Columbia, Puerto Rico, and Guam collect data annually and American Samoa, Federated States of Micronesia, and Palau collect survey data over a limited point- in-time (usually one to three months). In this document, the term “state” is used to refer to all areas participating in BRFSS, including the District of Columbia, Guam, and the Commonwealth of Puerto Rico. Disproportionate stratified sampling (DSS) has been used for the landline sample and the cellular telephone respondents are randomly selected with each having equal probability of selection. The dataset we are working on contains 330 variables for a total of 491, 775 samples in 2013. All missing values are coded NA in the R Workspace.
+## Generalizability:
+# The sample data allows us to generalize to the population of interest. The BRFSS is a survey of 491,775 U.S. adults i.e. 18 years or older. The survey follows a large stratified random sample. Due to the nature of the data it is susceptible to some biases associated with non-response, incomplete interviews and missing values.
+## Causality:
+# Only non-causal and correlation statements can be made using the results from the data as no random assignment was used while gathering data. Therefore, BRFSS is simply an observation study that can establish only correlation/association between variables.
+
+### Part 2:
+## Research quesion 1:
+# Is there any association between income and health care coverage?
+## Research quesion 2:
+# Do people with higher income have also better health conditions? Are the results affected by whether one smoke or not?
+## Research quesion 3:
+# Is there a correlation between being number of hours worked per week and poor health?
+
+### Part 3:
+## Research quesion 1:
+# Is there any association between income and health care coverage?
+
+plot(brfss2013$income2, brfss2013$hlthpln1, xlab = 'Income Level', ylab = 'Health Care Coverage', main =
+       'Income Level versus Health Care Coverage')
+## Finding:
+# We can see that higher income respondents are more likely to have health care coverage than the lower income respondents.
+
+## Research quesion 2:
+# Do people with higher income have also better health conditions? Are the results affected by whether one smoke or not?
+
+brfss2013 %>%
+  group_by(educa) %>% 
+  summarise(count=n())
+
+brfss2013 %>% 
+  group_by(genhlth) %>%
+  summarise(count=n())
+
+brfss2013 %>% 
+  group_by(X_rfsmok3) %>% 
+  summarise(count=n())
+
+#We get a Warning message stating the data contains implicit NA. So we create a new dataset by cleaning the NAs from the variables and summarize them again.
+
+brfss2013_cleaned_1 <- brfss2013 %>% 
+  filter(!(is.na(genhlth)), !(is.na(educa)), !(is.na(X_rfsmok3)))
+
+brfss2013_cleaned_1 %>% 
+  group_by(educa) %>% 
+  summarise(count=n())
+
+brfss2013_cleaned_1 %>% 
+  group_by(genhlth) %>% 
+  summarise(count=n())
+
+brfss2013_cleaned_1 %>% 
+  group_by(X_rfsmok3) %>% 
+  summarise(count=n())
+
+# Labelling
+levels(brfss2013_cleaned_1$educa) <- 
+  c("kindergarten", "Elementary", "Some high school", "High school graduate", "Some college", "College graduate")
+
+# education level and level of general health in a barplot.
+edu_hlt_bar <- 
+  ggplot(brfss2013_cleaned_1) + aes(x= educa,fill=genhlth) + geom_bar(position = "fill")
+
+edu_hlt_bar <- 
+  edu_hlt_bar + xlab("Education level") + ylab("Proportion") + scale_fill_brewer(name="Quality of Health", palette = "RdPu") + theme(axis.text.x = element_text(angle =90, size = 10, vjust = 0.5))
+
+edu_hlt_bar
+
+# We can see that as level of education completed increases, the proportion of people reporting a better general health also increases.  Let’s add the variable for smokers to the graph to see if there is any difference between the smokers and nonsmokers.
+
+edu_hlt_bar_smoke <- 
+  ggplot(brfss2013_cleaned_1) + aes(x= X_rfsmok3,fill=genhlth) + geom_bar(position = "fill") + facet_grid(.~educa)
+
+edu_hlt_bar_smoke <- 
+  edu_hlt_bar_smoke + xlab("Education level per smoker(Yes/No)") + ylab("Proportion") + scale_fill_brewer(name="Reported Health", palette = "RdPu")
+
+edu_hlt_bar_smoke
+
+# Finding:
+# We can see from the bar chart that not only there is a difference in the health reported by respondent according to whether they are smokers or not but also the difference of reported health amongst respondent with lowest education, does not vary much according to whether they are smokers of not. Therefore, smoking habit seems to make a difference on reported quality of health especially on those who have a higher education.
+
+## Research quesion 3:
+# Is there a correlation between being number of hours worked per week and poor health?
+
+brfss2013_cleaned_2 <- brfss2013 %>% 
+  filter(!(is.na(scntwrk1)), !(is.na(genhlth))) %>% 
+  group_by(scntwrk1) %>% 
+  summarize(poorhlthpct = sum(genhlth == "Poor") * 100 / n()) %>% 
+  arrange(desc(poorhlthpct)) %>% 
+  mutate(poorhlthpct = poorhlthpct)
+
+View(brfss2013_cleaned_2)
+print(brfss2013_cleaned_2)
+
+brfss2013_cleaned_2 %>% 
+  print(n=20)
+
+brfss2013_cleaned_2 <- 
+  ggplot(data = brfss2013_cleaned_2, aes(x = scntwrk1, y = poorhlthpct)) + geom_point() + geom_line()
+
+brfss2013_cleaned_2 <- 
+  brfss2013_cleaned_2 + xlab("Hours Worked Per Week") + ylab("Percentage With Poor Health")
+
+brfss2013_cleaned_2
+
+## Finding:
+# The majority of the plot follows that of a roughly right skewed distribution, with a significant outlier around 80 hours worked. The distribution follows a zigzag trend stating that there is a loose correlation between the number of hours worked per week and reporting poor health based on the distribution.
