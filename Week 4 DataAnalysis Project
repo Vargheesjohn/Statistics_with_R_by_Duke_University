@@ -31,7 +31,7 @@ library(dplyr)
 
 
 ```{r}
-load("C:/Users/IIMT/Desktop/vj/Coursera/Stats with R/_384b2d9eda4b29131fb681b243a7767d_brfss2013/Intro_Data_Prob_Project.Rdata")
+load("Intro_Data_Prob_Project.Rdata")
 ```
 
 # **Part II**
